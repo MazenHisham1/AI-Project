@@ -65,7 +65,6 @@ othello_ai/
 
 <h2 style="color:#2E86C1;">🔧 Future Improvements</h2>
 <ul>
-  <li>Add a graphical interface (Tkinter / Pygame)</li>
   <li>Stronger AI with better heuristics</li>
   <li>Performance optimization</li>
   <li>Match replay system</li>
