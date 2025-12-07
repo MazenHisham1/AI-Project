@@ -7,14 +7,13 @@ from ai.IntermediateAgent import IntermediateAgent
 from ai.AdvancedAgent import AdvancedAgent
 
 
-class PlayerVsAgentMode:
-    def __init__(self, human_color=BLACK, agent_cls=IntermediateAgent):
+class AgentVsAgentMode:
+    def __init__(self, black_cls=BeginnerAgent, white_cls=AdvancedAgent):
         self.state = GameState()
-        self.human_color = human_color
-        self.agent_color = WHITE if human_color == BLACK else BLACK
-        self.agent: BaseAgent = agent_cls(self.agent_color)
+        self.black_agent: BaseAgent = black_cls(BLACK)
+        self.white_agent: BaseAgent = white_cls(WHITE)
 
-    def handle_human_click(self, row: int, col: int):
+    def step(self):
         if self.state.game_over:
             return {
                 "success": False,
@@ -23,29 +22,32 @@ class PlayerVsAgentMode:
                 "winner": self.state.winner,
             }
 
-        if self.state.current_player != self.human_color:
+        if self.state.current_player == BLACK:
+            agent = self.black_agent
+        else:
+            agent = self.white_agent
+
+        move = agent.get_move(self.state)
+
+        if move is None:
+            self.state.switch_turn()
             return {
                 "success": False,
-                "reason": "not_human_turn",
+                "reason": "no_valid_move",
                 "game_over": self.state.game_over,
                 "winner": self.state.winner,
+                "current_player": self.state.current_player,
             }
 
-        success = self.state.apply_move(row, col)
+        success = self.state.apply_move(*move)
 
         if not success:
             return {
                 "success": False,
-                "reason": "invalid_human_move",
+                "reason": "invalid_agent_move",
                 "game_over": self.state.game_over,
                 "winner": self.state.winner,
             }
-
-        agent_move = None
-        if (not self.state.game_over) and (self.state.current_player == self.agent_color):
-            agent_move = self.agent.get_move(self.state)
-            if agent_move is not None:
-                self.state.apply_move(*agent_move)
 
         return {
             "success": True,
@@ -53,9 +55,7 @@ class PlayerVsAgentMode:
             "game_over": self.state.game_over,
             "winner": self.state.winner,
             "current_player": self.state.current_player,
-            "last_agent_move": agent_move,
-            "valid_moves": self.state.board.get_valid_moves(self.state.current_player)
-                            if not self.state.game_over else [],
+            "last_move": move,
         }
 
     def get_board(self):
@@ -63,3 +63,4 @@ class PlayerVsAgentMode:
 
     def get_current_player(self):
         return self.state.current_player
+
