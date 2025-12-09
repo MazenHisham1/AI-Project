@@ -34,6 +34,7 @@ othello_ai/
   <li>Automatic piece flipping and turn switching</li>
   <li>Score calculation and game-over detection</li>
   <li>Multiple play modes: PvP, PvAI, AIvAI</li>
+  <li>Three Levels For AI: Beginner, Intermediate, Advanced</li>
   <li>AI using Minimax algorithm with evaluation heuristics</li>
 </ul>
 
