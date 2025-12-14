@@ -14,7 +14,7 @@ class GameState:
             return False
 
         new_board = self.board.make_move(r, c, self.current_player)
-        if new_board:
+        if new_board: # if the move is valid
             self.board = new_board
             self.log.append((self.current_player, r, c))
             self.switch_turn()
