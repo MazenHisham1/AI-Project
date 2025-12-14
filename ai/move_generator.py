@@ -1,10 +1,4 @@
-import math
-import random
-
-
-def move_generator(game_state):
-    """
-    Returns a list of all valid moves for the current player.
-    """
-    return game_state.get_valid_moves()
-
+class MoveGenerator:
+    
+    def get_moves(board, player):
+        return board.get_valid_moves(player)
