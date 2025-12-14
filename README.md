@@ -35,7 +35,7 @@ othello_ai/
   <li>Score calculation and game-over detection</li>
   <li>Multiple play modes: PvP, PvAI, AIvAI</li>
   <li>Three Levels For AI: Beginner, Intermediate, Advanced</li>
-  <li>AI using Minimax algorithm with evaluation heuristics</li>
+  <li>AI using Minimax algorithm with Alpha beta pruning and evaluation heuristics</li>
 </ul>
 
 <hr style="border:1px solid #eee; margin:20px 0;">
