@@ -1,14 +1,10 @@
 import random
-import math
-
-
-from ai.algorithm import minimax, move_generator
+from ai.base_agent import BaseAgent
+from ai.move_generator import MoveGenerator
 
 class BeginnerAgent(BaseAgent):
-    """Randomly selects a valid move."""
-    def get_move(self, game_state):
+    def get_move(self, board):
         moves = MoveGenerator.get_moves(board, self.color)
-        if not moves:
-            return None
-        return random.choice(moves)
-
+        if moves:
+            return random.choice(moves)
+        return None
