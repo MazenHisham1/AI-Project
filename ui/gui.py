@@ -1,6 +1,5 @@
 import customtkinter as ctk
 import time
-
 from core.constants import BLACK, WHITE, EMPTY, COLOR_MAP
 from core.game_controller import GameController
 
@@ -24,13 +23,17 @@ class BoardCell(ctk.CTkFrame):
         self.c = c
         self.click_callback = click_callback 
         self.piece_frame = None
+        
+        self.current_state = "empty" # "empty", "black", "white", "hint"
 
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)
         self.bind("<Button-1>", self.on_click) 
 
     def on_enter(self, event):
-        if self.piece_frame is None: self.configure(fg_color=COLOR_CELL_HOVER)
+        # Only hover effect if cell is truly empty (no piece, no hint)
+        if self.current_state == "empty": 
+            self.configure(fg_color=COLOR_CELL_HOVER)
     
     def on_leave(self, event):
         self.configure(fg_color=COLOR_CELL_1)
@@ -38,26 +41,38 @@ class BoardCell(ctk.CTkFrame):
     def on_click(self, event):
         if self.click_callback: self.click_callback(self.r, self.c)
 
-    def set_piece(self, color_code):
-        if self.piece_frame: self.piece_frame.destroy()
+    def update_view(self, state_type, color=None):
+       
+        # Create a signature for the new state
+        new_state_signature = f"{state_type}_{color}"
+        
+        # If nothing changed, do absolutely nothing (Instant Speed)
+        if self.current_state == new_state_signature:
+            return
+
+        self.current_state = new_state_signature
+        
+        # 1. Clean up old widgets
+        if self.piece_frame:
+            self.piece_frame.destroy()
+            self.piece_frame = None
+        
+        # 2. Reset Base
         self.configure(fg_color=COLOR_CELL_1, border_width=0)
-        if color_code is None: return
-        size = self.winfo_reqwidth() * 0.75
-        self.piece_frame = ctk.CTkFrame(self, width=size, height=size, corner_radius=size/2, fg_color=color_code, bg_color="transparent")
-        self.piece_frame.place(relx=0.5, rely=0.5, anchor="center")
-        self.piece_frame.bind("<Button-1>", self.on_click)
 
-    def set_hint(self):
-        if self.piece_frame: self.piece_frame.destroy()
-        self.configure(border_width=2, border_color=COLOR_GOLD)
-        self.piece_frame = ctk.CTkFrame(self, width=12, height=12, corner_radius=6, fg_color=COLOR_GOLD)
-        self.piece_frame.place(relx=0.5, rely=0.5, anchor="center")
-        self.piece_frame.bind("<Button-1>", self.on_click)
-
-    def clear(self):
-        if self.piece_frame: self.piece_frame.destroy()
-        self.piece_frame = None
-        self.configure(border_width=0, fg_color=COLOR_CELL_1)
+        # 3. Draw New State
+        if state_type == "piece":
+            size = self.winfo_reqwidth() * 0.75
+            self.piece_frame = ctk.CTkFrame(self, width=size, height=size, corner_radius=size/2, fg_color=color, bg_color="transparent")
+            self.piece_frame.place(relx=0.5, rely=0.5, anchor="center")
+            # Bind click through the piece
+            self.piece_frame.bind("<Button-1>", self.on_click)
+            
+        elif state_type == "hint":
+            self.configure(border_width=2, border_color=COLOR_GOLD)
+            self.piece_frame = ctk.CTkFrame(self, width=12, height=12, corner_radius=6, fg_color=COLOR_GOLD)
+            self.piece_frame.place(relx=0.5, rely=0.5, anchor="center")
+            self.piece_frame.bind("<Button-1>", self.on_click)
 
 class GameScreen(ctk.CTkFrame):
     def __init__(self, master, on_back, agent_black, agent_white):
@@ -67,7 +82,7 @@ class GameScreen(ctk.CTkFrame):
         
         self.game_over_shown = False
 
-        # We pass callbacks so the controller can update the UI when needed
+        # Initialize Controller
         self.controller = GameController(
             agent_black, 
             agent_white, 
@@ -104,7 +119,6 @@ class GameScreen(ctk.CTkFrame):
         for r in range(8):
             row_cells = []
             for c in range(8):
-                # Pass user clicks to controller
                 cell = BoardCell(self.grid_inner, r, c, cell_size, self.controller.handle_click)
                 cell.grid(row=r, column=c, padx=2, pady=2)
                 row_cells.append(cell)
@@ -113,19 +127,16 @@ class GameScreen(ctk.CTkFrame):
         self.bottom_bar = ctk.CTkFrame(self, fg_color="transparent")
         self.bottom_bar.pack(side="bottom", pady=30)
         
-        # Initial Draw
         self.update_gui()
 
-    # --- CONTROLLER CALLBACKS ---
+    # --- UI CALLBACKS ---
     def handle_ai_result(self, move):
-        # AI thread finished, schedule the update on Main UI Thread
         self.after(0, lambda: self.controller.finish_ai_move(move))
 
     def update_status(self, text, is_busy=False):
         self.lbl_status.configure(text=text, text_color=COLOR_ACCENT if is_busy else COLOR_GOLD)
 
     def update_gui(self):
-        """Reads state from Controller and paints the screen"""
         # 1. Update Buttons
         self.setup_bottom_buttons()
 
@@ -135,13 +146,11 @@ class GameScreen(ctk.CTkFrame):
         current_plr = game_state.current_player
         is_replay = self.controller.is_replay_mode
         
-        # 3. Update Grid
-        # Only calc valid moves if it's a playing turn
+        # 3. Update Grid (OPTIMIZED)
         valid_moves = []
         if not is_replay and not game_state.game_over:
             valid_moves = board.get_valid_moves(current_plr)
         
-        # Determine if hint dots should show (only for Human turn)
         is_human_turn = (current_plr == BLACK and not self.controller.agent_black) or \
                         (current_plr == WHITE and not self.controller.agent_white)
         show_hints = is_human_turn and not is_replay and not self.controller.is_ai_thinking
@@ -150,19 +159,21 @@ class GameScreen(ctk.CTkFrame):
             for c in range(8):
                 cell = self.cells[r][c]
                 val = board.grid[r][c]
-                cell.clear()
                 
+                # Use update_view instead of clear/set_piece
                 if val != EMPTY:
-                    cell.set_piece(COLOR_MAP[val])
+                    cell.update_view("piece", COLOR_MAP[val])
                 elif show_hints and (r, c) in valid_moves:
-                    cell.set_hint()
+                    cell.update_view("hint")
+                else:
+                    cell.update_view("empty")
 
         # 4. Update Scores
         b, w = board.get_score()
         self.lbl_score_black.configure(text=str(b))
         self.lbl_score_white.configure(text=str(w))
 
-        # 5. Update Status Pill (if not currently "Thinking")
+        # 5. Status
         if is_replay:
             self.lbl_status.configure(text="Replay Mode", text_color="white")
         elif game_state.game_over:
@@ -172,7 +183,7 @@ class GameScreen(ctk.CTkFrame):
             txt = "Black's Turn" if current_plr == BLACK else "White's Turn"
             self.lbl_status.configure(text=txt, text_color=COLOR_GOLD)
 
-        # 6. Highlight Active Score Card
+        # 6. Active Card
         if not is_replay:
             self.card_black.configure(border_width=2 if current_plr == BLACK else 0, border_color=COLOR_GOLD)
             self.card_white.configure(border_width=2 if current_plr == WHITE else 0, border_color=COLOR_GOLD)
@@ -181,7 +192,6 @@ class GameScreen(ctk.CTkFrame):
         for widget in self.bottom_bar.winfo_children(): widget.destroy()
 
         if self.controller.is_replay_mode:
-            # Replay Controls
             ctk.CTkButton(self.bottom_bar, text="Exit Replay", command=self.controller.exit_replay, fg_color="#ff5555", width=100, height=40, corner_radius=8).pack(side="left", padx=10)
             ctk.CTkButton(self.bottom_bar, text="< Prev", command=self.controller.prev_replay, fg_color=COLOR_CARD_BG, width=80, height=40, corner_radius=8).pack(side="left", padx=10)
             
@@ -191,7 +201,6 @@ class GameScreen(ctk.CTkFrame):
             
             ctk.CTkButton(self.bottom_bar, text="Next >", command=self.controller.next_replay, fg_color=COLOR_CARD_BG, width=80, height=40, corner_radius=8).pack(side="left", padx=10)
         else:
-            # Normal Controls
             self.btn_menu = ctk.CTkButton(self.bottom_bar, text="Menu", font=("Roboto", 14), fg_color=COLOR_CARD_BG, text_color="white", hover_color=COLOR_CARD_HOVER, width=120, height=40, corner_radius=8, command=self.on_back)
             self.btn_menu.pack(side="left", padx=15)
             
@@ -202,7 +211,6 @@ class GameScreen(ctk.CTkFrame):
             self.btn_restart.pack(side="left", padx=15)
 
     def restart_game_ui(self):
-        # Clear overlays
         for widget in self.winfo_children():
             if isinstance(widget, ctk.CTkFrame) and widget not in [self.top_bar, self.board_frame, self.bottom_bar, self.status_pill]:
                 widget.destroy()
@@ -210,7 +218,6 @@ class GameScreen(ctk.CTkFrame):
         self.controller.restart()
 
     def enter_replay_ui(self):
-        # Clear overlays
         for widget in self.winfo_children():
             if isinstance(widget, ctk.CTkFrame) and widget not in [self.top_bar, self.board_frame, self.bottom_bar, self.status_pill]:
                 widget.destroy()
@@ -231,10 +238,7 @@ class GameScreen(ctk.CTkFrame):
             msg = "It's a Draw!"
             color = COLOR_GOLD
         elif is_pva:
-            # Check Human Win (Human is the one who is NOT an agent)
             human_color = BLACK if not self.controller.agent_black else WHITE
-            
-            # Simple check: if both are agents, handle generic win msg
             if self.controller.agent_black and self.controller.agent_white:
                  name = "Black" if winner == BLACK else "White"
                  msg = f"{name} Wins!"
@@ -340,6 +344,5 @@ class MenuScreen(ctk.CTkFrame):
         try:
             self.start_pva(level)
         except TypeError:
-            print(f"[WARNING] Crash prevented")
-
+            print(f"[WARNING] Crash prevented: 'main.py' outdated. Defaulting.")
             self.start_pva()
