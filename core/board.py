@@ -2,7 +2,7 @@ import copy
 from .constants import BLACK, WHITE, EMPTY
 
 class Board:
-    def _init_(self):
+    def __init__(self):
         self.size = 8
         self.grid = [[EMPTY for _ in range(8)] for _ in range(8)]
         self._setup_board()
@@ -74,3 +74,4 @@ class Board:
         b = sum(row.count(BLACK) for row in self.grid)
         w = sum(row.count(WHITE) for row in self.grid)
         return b, w
+
