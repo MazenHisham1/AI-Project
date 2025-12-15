@@ -1,41 +1,16 @@
-from core.game_state import GameState
-from core.constants import BLACK, WHITE
 
+from ai.beginner_agent import BeginnerAgent
+from ai.intermediate_agent import IntermediateAgent
+from ai.advanced_agent import AdvancedAgent
+from core.constants import WHITE
 
-class PlayerVsPlayerMode:
-    def __init__(self):
-        self.state = GameState()
-
-    def handle_click(self, row: int, col: int):
-        if self.state.game_over:
-            return {
-                "success": False,
-                "reason": "game_over",
-                "game_over": True,
-                "winner": self.state.winner,
-            }
-
-        success = self.state.apply_move(row, col)
-
-        if not success:
-            return {
-                "success": False,
-                "reason": "invalid_move",
-                "game_over": self.state.game_over,
-                "winner": self.state.winner,
-            }
-
-        return {
-            "success": True,
-            "reason": None,
-            "game_over": self.state.game_over,
-            "winner": self.state.winner,
-            "current_player": self.state.current_player,
-            "valid_moves": self.state.board.get_valid_moves(self.state.current_player),
-        }
-
-    def get_board(self):
-        return self.state.board.grid
-
-    def get_current_player(self):
-        return self.state.current_player
+class PvAMode:
+    def get_agents(difficulty='advanced'):
+        # Player (None) vs Agent (White)
+        if difficulty == 'beginner':
+            return None, BeginnerAgent(WHITE)
+        elif difficulty == 'intermediate':
+            return None, IntermediateAgent(WHITE)
+        else:
+            # Default to advanced
+            return None, AdvancedAgent(WHITE)
