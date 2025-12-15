@@ -1,10 +1,6 @@
 import random
 import math
 
-
-from ai.algorithm import minimax, move_generator
-
-
 class BaseAgent:
     def __init__(self, color):
         self.color = color
