@@ -1,6 +1,6 @@
-from ai.beginner_agent import BeginnerAgent
-from ai.intermediate_agent import IntermediateAgent
-from ai.advanced_agent import AdvancedAgent
+from ai.BeginnerAgent import BeginnerAgent
+from ai.IntermediateAgent import IntermediateAgent
+from ai.AdvancedAgent import AdvancedAgent
 from core.constants import WHITE
 
 class PvAMode:
