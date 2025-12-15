@@ -3,18 +3,16 @@ import time
 import sys
 import os
 
-# --- PATH SETUP ---
-# Add the project root directory to sys.path so we can import from 'core'
+from core.constants import BLACK, WHITE, EMPTY, COLOR_MAP
+from core.game_controller import GameController
+
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-# --- IMPORTS ---
-from core.constants import BLACK, WHITE, EMPTY, COLOR_MAP
-from core.game_controller import GameController
-
-# --- COLORS ---
+# COLORS 
 COLOR_BG = "#0b1210"
 COLOR_CARD_BG = "#14211a"
 COLOR_CARD_HOVER = "#1e3328"
@@ -56,11 +54,7 @@ class BoardCell(ctk.CTkFrame):
         if self.click_callback: self.click_callback(self.r, self.c)
 
     def set_state(self, state_type, color=None):
-        """
-        Smart update method. 
-        state_type: "empty", "hint", or "piece"
-        color: required if state_type is "piece"
-        """
+      
         if self.last_state == state_type and self.last_color == color:
             return
 
@@ -323,3 +317,4 @@ class MenuScreen(ctk.CTkFrame):
         except TypeError:
             print(f"[WARNING] Crash prevented: 'main.py' outdated. Defaulting.")
             self.start_pva()
+
