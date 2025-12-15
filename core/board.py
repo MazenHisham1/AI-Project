@@ -1,9 +1,9 @@
 import copy
-from core.constants import BLACK, WHITE, EMPTY,BOARD_SIZE,DIRECTIONS
+from .constants import BLACK, WHITE, EMPTY
 
 class Board:
     def _init_(self):
-        self.size = BOARD_SIZE
+        self.size = 8
         self.grid = [[EMPTY for _ in range(8)] for _ in range(8)]
         self._setup_board()
 
@@ -14,11 +14,11 @@ class Board:
         self.grid[4][4] = WHITE
 
     def is_on_board(self, r, c):
-        
         return 0 <= r < 8 and 0 <= c < 8
 
     def get_valid_moves(self, player):
         moves = []
+        
         for r in range(8):
             for c in range(8):
                 if self.is_valid_move(r, c, player):
@@ -30,7 +30,7 @@ class Board:
             return False
 
         opponent = -player
-        directions = DIRECTIONS
+        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
         for dr, dc in directions:
             rr, cc = r + dr, c + dc
@@ -53,7 +53,7 @@ class Board:
         new_board = copy.deepcopy(self)
         new_board.grid[r][c] = player
         opponent = -player
-        directions = DIRECTIONS
+        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
         for dr, dc in directions:
             rr, cc = r + dr, c + dc
