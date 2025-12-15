@@ -1,11 +1,10 @@
 import customtkinter as ctk
 import time
 
-# --- IMPORTS ---
 from core.constants import BLACK, WHITE, EMPTY, COLOR_MAP
 from core.game_controller import GameController
 
-# --- COLORS ---
+# COLORS
 COLOR_BG = "#0b1210"
 COLOR_CARD_BG = "#14211a"
 COLOR_CARD_HOVER = "#1e3328"
@@ -68,7 +67,6 @@ class GameScreen(ctk.CTkFrame):
         
         self.game_over_shown = False
 
-        # --- Initialize Controller ---
         # We pass callbacks so the controller can update the UI when needed
         self.controller = GameController(
             agent_black, 
@@ -343,4 +341,5 @@ class MenuScreen(ctk.CTkFrame):
             self.start_pva(level)
         except TypeError:
             print(f"[WARNING] Crash prevented")
+
             self.start_pva()
