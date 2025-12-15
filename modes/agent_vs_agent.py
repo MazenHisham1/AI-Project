@@ -3,6 +3,7 @@ from ai.advanced_agent import AdvancedAgent
 from core.constants import BLACK, WHITE
 
 class ava:
+    @staticmethod
     def get_agents():  
         return BeginnerAgent(BLACK), AdvancedAgent(WHITE)
 
