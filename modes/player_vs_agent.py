@@ -3,7 +3,7 @@ from ai.intermediate_agent import IntermediateAgent
 from ai.advanced_agent import AdvancedAgent
 from core.constants import WHITE
 
-class PvAMode:
+class avp:
     @staticmethod
     def get_agents(difficulty='advanced'):
         # Player (None) vs Agent (White)
