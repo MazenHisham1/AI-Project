@@ -1,5 +1,5 @@
-from ai.beginner_agent import BeginnerAgent
-from ai.advanced_agent import AdvancedAgent
+from ai.BeginnerAgent import BeginnerAgent
+from ai.AdvancedAgent import AdvancedAgent
 from core.constants import BLACK, WHITE
 
 class AvAMode:
