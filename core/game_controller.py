@@ -4,7 +4,7 @@ from core.game_state import GameState
 from core.constants import BLACK, WHITE
 
 class GameController:
-    def _init_(self, agent_black, agent_white, callbacks):
+    def __init__(self, agent_black, agent_white, callbacks):
         self.agent_black = agent_black
         self.agent_white = agent_white
         self.callbacks = callbacks
