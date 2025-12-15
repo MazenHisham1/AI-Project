@@ -4,7 +4,7 @@ from core.game_state import GameState
 from core.constants import BLACK, WHITE
 
 class GameController:
-    def __init__(self, agent_black, agent_white, callbacks):
+    def _init_(self, agent_black, agent_white, callbacks):
         self.agent_black = agent_black
         self.agent_white = agent_white
         self.callbacks = callbacks
@@ -73,6 +73,54 @@ class GameController:
         if not self.game_state.game_over:
             self.check_ai_turn()
 
-    # GETTERS FOR UI
+    # --- VIEW HELPERS (Exposing data and logic for GUI) ---
     def get_board(self):
         return self.game_state.board
+
+    def get_scores(self):
+        return self.game_state.board.get_score()
+
+    def get_current_player(self):
+        return self.game_state.current_player
+
+    def is_game_over(self):
+        return self.game_state.game_over
+
+    def get_valid_moves(self):
+        """Returns valid moves for the current player if game is active."""
+        if self.game_state.game_over:
+            return []
+        return self.game_state.board.get_valid_moves(self.game_state.current_player)
+
+    def should_show_hints(self):
+        """Determines if hints should be visible (Human turn only)."""
+        if self.game_state.game_over or self.is_ai_thinking:
+            return False
+        
+        curr = self.game_state.current_player
+        is_human_turn = (curr == BLACK and not self.agent_black) or \
+                        (curr == WHITE and not self.agent_white)
+        return is_human_turn
+
+    def get_game_over_details(self):
+        """
+        Returns (message, result_type)
+        result_type: 'draw', 'win', 'loss', 'neutral_win'
+        """
+        winner = self.game_state.winner
+        is_pva = (self.agent_black or self.agent_white)
+        
+        if winner == 0:
+            return "It's a Draw!", 'draw'
+        
+        # Player vs Agent Logic
+        if is_pva and not (self.agent_black and self.agent_white):
+            human_color = BLACK if not self.agent_black else WHITE
+            if winner == human_color:
+                return "🎉 Victory! You Won! 🎉", 'win'
+            else:
+                return "Game Over. Try Again!", 'loss'
+        
+        # PvP or AvA Logic
+        name = "Black" if winner == BLACK else "White"
+        return f"{name} Wins!", 'neutral_win'
