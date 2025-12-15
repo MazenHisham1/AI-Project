@@ -10,7 +10,6 @@ othello_ai/
   core/
   ai/
   ui/
-  utils/
   modes/
   main.py
   requirements.txt
@@ -22,7 +21,6 @@ othello_ai/
   <li><strong>core/</strong> - Game engine logic (board, moves, flipping, game state, constants)</li>
   <li><strong>ai/</strong> - AI components (minimax(Alpha–Beta pruning), evaluation, move generator, base agent)</li>
   <li><strong>ui/</strong> - Console-based interface</li>
-  <li><strong>utils/</strong> - Utilities like Match replay system</li>
   <li><strong>modes/</strong> - Game modes: Player vs Player, Player vs AI, AI vs AI</li>
 </ul>
 
@@ -60,6 +58,8 @@ othello_ai/
   <li>AI and Minimax implementation</li>
   <li>Move generation and utilities</li>
   <li>User interface and game modes</li>
+  <li>Match replay system</li>
+
 </ul>
 
 <hr style="border:1px solid #eee; margin:20px 0;">
