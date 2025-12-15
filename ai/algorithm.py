@@ -45,7 +45,7 @@ class Minimax:
             return self.evaluate.evaluate_board(state, -player)
         
         if player == 1:
-            if len(state.get_valid_moves(BLACK)) == 0:
+            if len(state.get_valid_moves(player)) == 0:
                 return self.evaluate.evaluate_board(state, player)
             maxEval = -math.inf
             for move in state.get_valid_moves(player):
@@ -58,7 +58,7 @@ class Minimax:
             return maxEval
         
         else:
-            if len(state.get_valid_moves(WHITE)) == 0:
+            if len(state.get_valid_moves(player)) == 0:
                 return self.evaluate.evaluate_board(state, player)
             minEval = math.inf
             for move in state.get_valid_moves(player):
@@ -70,4 +70,5 @@ class Minimax:
                     break
             return minEval
         
+
     
