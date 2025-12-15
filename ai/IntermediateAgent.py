@@ -1,12 +1,11 @@
-import random
-import math
-
-# نقوم باستيراد الخوارزمية من الملف المجاور
-from ai.algorithm import minimax, move_generator
+from ai.base_agent import BaseAgent
+from ai.algorithm import Minimax
 
 class IntermediateAgent(BaseAgent):
-    """Uses Minimax with low depth (e.g., 2)."""
-    def get_move(self, game_state):
-        # Depth 2 سريع ومناسب للمستوى المتوسط
-        _, move = minimax(game_state, 2, -math.inf, math.inf, True, self.color)
-        return move
+    def __init__(self, color):
+        super().__init__(color)
+        self.ai = Minimax()
+
+    def get_move(self, board):
+        
+        return self.ai.get_move_using_minimax(board, self.color, depth=3)
